@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="Copyright © Panic Inc.">
+<title>Designing for Playdate</title>
+<link rel="stylesheet" href="./Designing%20for%20Playdate/dfp.css">
+<link rel="stylesheet" href="./Inside%20Playdate/adoc.css">
+<link rel="stylesheet" href="./Inside%20Playdate/colors.css">
+<link rel="stylesheet" href="./Inside%20Playdate/themes.css">
+<link rel="stylesheet" href="./Inside%20Playdate/fonts.css">
+<link rel="stylesheet" href="./Inside%20Playdate/coderay.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Designing for Playdate</h1>
+<div class="details">
+<span id="author" class="author">Copyright © Panic Inc.</span><br>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div id="toc" class="toc">
+<div id="toctitle" class="title">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_screen">1. Screen</a>
+<ul class="sectlevel2">
+<li><a href="#_sprites">1.1. Sprites</a></li>
+<li><a href="#_tiles">1.2. Tiles</a></li>
+<li><a href="#_text">1.3. Text</a></li>
+<li><a href="#_2x_graphics">1.4. 2x Graphics</a></li>
+<li><a href="#_transforming_bitmap_images">1.5. Transforming bitmap images</a></li>
+<li><a href="#_dither_patterns">1.6. Dither patterns</a></li>
+<li><a href="#_dither_flashing">1.7. Dither flashing</a></li>
+<li><a href="#_refresh_rate">1.8. Refresh rate</a></li>
+<li><a href="#_screen_accessibility">1.9. Screen accessibility</a></li>
+</ul>
+</li>
+<li><a href="#_sound">2. Sound</a>
+<ul class="sectlevel2">
+<li><a href="#_sound_accessibility">2.1. Sound accessibility</a></li>
+</ul>
+</li>
+<li><a href="#_crank">3. Crank</a>
+<ul class="sectlevel2">
+<li><a href="#_using_buttons_and_the_crank_together">3.1. Using buttons and the crank together</a></li>
+<li><a href="#_crank_accessibility">3.2. Crank accessibility</a></li>
+</ul>
+</li>
+<li><a href="#_buttons">4. Buttons</a>
+<ul class="sectlevel2">
+<li><a href="#_button_accessibility">4.1. Button accessibility</a></li>
+</ul>
+</li>
+<li><a href="#_accelerometer">5. Accelerometer</a></li>
+<li><a href="#_user_interface">6. User Interface</a>
+<ul class="sectlevel2">
+<li><a href="#_system_font">6.1. System font</a></li>
+<li><a href="#_onscreen_keyboard">6.2. Onscreen keyboard</a></li>
+<li><a href="#_crank_indicator">6.3. Crank indicator</a></li>
+<li><a href="#_qr_codes">6.4. QR codes</a></li>
+</ul>
+</li>
+<li><a href="#_launcher">7. Launcher</a>
+<ul class="sectlevel2">
+<li><a href="#_launcher_card">7.1. Launcher card</a></li>
+<li><a href="#_menu">7.2. Menu</a></li>
+<li><a href="#_menu_image">7.3. Menu Image</a></li>
+</ul>
+</li>
+<li><a href="#_performance">8. Performance</a></li>
+<li><a href="#_playdate_simulator_vs_playdate_hardware">9. Playdate Simulator vs. Playdate hardware</a>
+<ul class="sectlevel2">
+<li><a href="#_simulator_performance">9.1. Simulator performance</a></li>
+<li><a href="#_simulator_appearance">9.2. Simulator appearance</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Playdate is a curious little game console. It looks a little bit like a "retro" system, but the hardware inside is quite modern. When creating a game for Playdate, there are some unique considerations to keep in mind, such as its small physical size, 1-bit screen, and crank.</p>
+</div>
+<div class="paragraph">
+<p>This document offers advice on how to make your game more accessible and pleasant to play. Much of this is subjective, informed by our own experience developing for Playdate. We don&#8217;t enforce these guidelines. But be aware that not considering the guidelines may limit the potential audience for your game.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_screen">1. Screen</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Playdate has a Sharp Memory LCD screen. Although similar in appearance to e-ink, it is able to refresh at much higher rates. It also has a very small pixel pitch, the distance between pixels. This gives it the appearance of paper—specifically, newsprint.</p>
+</div>
+<div class="paragraph">
+<p>Like the printed page, Playdate has no backlight. But the screen is highly reflective, so the more ambient light the better. You won’t be able to play in a dark room without a light source, but your game will be beautifully sharp and clear if you’re outside on a sunny day or in a well-lit room.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-playdate-outside.png" alt="dfp playdate outside">
+</div>
+</div>
+<div class="paragraph">
+<p>The screen resolution is 400 × 240 pixels, at 173 pixels per inch. That means the pixels are quite small for the physical size of the screen, unlike a 1990s handheld console. It’s a pocket-sized screen, and you should note this when sizing your game’s graphics and fonts.</p>
+</div>
+<div class="paragraph">
+<p>The screen is surrounded by a black bezel, 3 mm wide. In good lighting conditions, this will blend into the black of the screen. You can use this to your advantage by pushing your graphics all the way to the edge.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-playdate-edge.png" alt="dfp playdate edge">
+</div>
+</div>
+<div class="paragraph">
+<p>Playdate’s screen is asymmetrically offset to the left side of the device. You don’t have to keep this in mind if you don’t care, but if you ever want to center an onscreen element on the physical Playdate, that vertical line is 28 pixels to the right of the center—so, at 228 on the x axis.</p>
+</div>
+<div class="sect2">
+<h3 id="_sprites">1.1. Sprites</h3>
+<div class="paragraph">
+<p>For the purposes of this document, we’ll consider “sprites” as playable characters, NPCs, and other moving, visible entities in your game.</p>
+</div>
+<div class="paragraph">
+<p>A reasonable minimum size for your player sprite is somewhere around 32 × 32 pixels. Sprites much smaller than this will be hard to make out on the screen.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-sprite-too-small.png" alt="dfp sprite too small">
+</div>
+</div>
+<div class="paragraph">
+<div class="title">This sprite is too small to read well on the Playdate screen</div>
+<p>As for a maximum size, there’s no real ceiling on this. Some games deliberately use very large characters.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-sprite-large.png" alt="dfp sprite large">
+</div>
+</div>
+<div class="paragraph">
+<div class="title"><em>Starfriend Gobo</em> by Chuck Jordan</div>
+<p>However, note that this doesn’t mean that everything in your game should be scaled up, resulting in a lot of scrolling.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-sprite-too-large.png" alt="dfp sprite too large">
+</div>
+</div>
+<div class="paragraph">
+<div class="title">This game would probably pan the camera around too much</div>
+<p>Small sprites are easier to see and track with your eyes if they move a lot, or if they have particles and other effects following them. In slower games, players might appreciate larger sprites.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tiles">1.2. Tiles</h3>
+<div class="paragraph">
+<p>If your game is based on a tile map—a layout grid for items and characters in the world, each of which is typically one "tile" in size—you should ensure the tiles aren’t too small for comfort. This is an example of a tile size that could cause the player’s eyes to strain:</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-tile-too-small.png" alt="dfp tile too small">
+</div>
+</div>
+<div class="paragraph">
+<div class="title">This level is made up of tiles 8 x 8 pixels in size</div>
+<p>And here’s a game with a comfortable tile size:</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-tile-size-right.png" alt="dfp tile size right">
+</div>
+</div>
+<div class="paragraph">
+<div class="title">This level is made up of tiles 32 x 32 pixels in size</div>
+<p>A tile size that’s a power of 2 is handy when authoring your art; its easy divisibility means you’ll be able to create a number of repeating patterns.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-tile-power-of-2.png" alt="dfp tile power of 2">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_text">1.3. Text</h3>
+<div class="paragraph">
+<p>Your game might use fonts for different kinds of text, such as titles, dialogue, labels, or status information. It’s important to make all text legible, and it’s particularly important when the player is expected to read a lot of it, and often.</p>
+</div>
+<div class="paragraph">
+<p>When discussing “font size” below, we mean the cap height—the height of an uppercase letter, from the baseline to the top of the letter (or an ascender). This isn’t the same as the total height of the font, which will be greater, to allow for diacritical marks, punctuation, etc. A font based on a grid 20 × 20 pixels in size will usually have a cap height of 14 pixels or so.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-font-cap-height.png" alt="dfp font cap height">
+</div>
+</div>
+<div class="paragraph">
+<p>Dialog text should be at least 12 pixels tall, and preferably 14 pixels tall.
+HUD text (score, health, level name) can be slightly smaller, down to 10 pixels tall. This holds true if the player isn’t meant to read the text very often.</p>
+</div>
+<div class="paragraph">
+<p>All text, including small disclaimers or subtle jokes, should be at least 8 pixels tall, unless your idea is to deliberately obscure it.</p>
+</div>
+<div class="paragraph">
+<p>A game in which text is more important than graphics should have decently sized text in a highly legible font. Classic rules of typography apply: clear, strong shapes; good contrast between similar characters; generous x-height.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-font-legible.png" alt="dfp font legible">
+</div>
+</div>
+<div class="paragraph">
+<p>We recommend that you make your font strokes at least 2 pixels thick. Thinner fonts will be rather wispy when seen on the screen.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-font-too-thin.png" alt="dfp font too thin">
+</div>
+</div>
+<div class="paragraph">
+<div class="title">Even a few lines of text this thin will be difficult to read</div>
+<p>A good way to judge the legibility of the fonts in your game is to hold up your Playdate against a printed book. Your font should be physically similar in size to the letters on the page—or larger than them.</p>
+</div>
+<div class="paragraph">
+<p>If you import a computer font using our <a href="https://play.date/caps">Caps</a> tool, note that it may or may not be hinted (snapped to pixel boundaries) properly at the size you specified. An improperly hinted font could look like this:</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-font-no-hint.png" alt="dfp font no hint">
+</div>
+</div>
+<div class="paragraph">
+<p>In this case, you might need to touch up the font manually.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_2x_graphics">1.4. 2x Graphics</h3>
+<div class="paragraph">
+<p>Some developers choose to render their games at a different display scale (using <a href="./Inside%20Playdate.html#f-display.setScale">playdate.display.setScale</a>). This results in larger, chunkier sprites, which can be easier to follow, though they sacrifice a finer level of detail.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-2x.png" alt="dfp 2x">
+</div>
+</div>
+<div class="paragraph">
+<p>Fonts rendered at 2x will need to be carefully designed. There’s always room for creativity, even with very few pixels, but legibility should remain a primary concern.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-2x-font.png" alt="dfp 2x font">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_transforming_bitmap_images">1.5. Transforming bitmap images</h3>
+<div class="paragraph">
+<p>It’s common for sprites in games to rotate, scale, or stretch. You may be tempted to do so in code, which would be the simpler and more maintainable option. However, this may have two undesirable consequences:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Rotating or scaling your images is CPU-intensive. Playdate has no GPU.</p>
+</li>
+<li>
+<p>The resulting images could look distorted and noisy.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Here’s an example of a programmatically rotated sprite:</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-rotated.png" alt="dfp rotated">
+</div>
+</div>
+<div class="paragraph">
+<p>An alternative is to pre-transform your graphics in an editor app, or with an image-processing script. 1-bit graphics take up very little storage and are quick to load. You can then also clean up any distracting pixel artifacts in these images. <a href="./Inside%20Playdate.html#C-graphics.imagetable">Image tables</a> can be used to conveniently access multiple transformations of the same image.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-rotated-clean.png" alt="dfp rotated clean">
+</div>
+</div>
+<div class="paragraph">
+<p>Choose the method that makes sense for the type and performance requirements of your game. Transforming sprites programmatically isn’t necessarily bad. It typically looks fine if the sprite moves quickly and stops in its natural, untransformed state:</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-rotate-small.gif" alt="dfp rotate small">
+</div>
+</div>
+<div class="paragraph">
+<p>Or, if the sprite is very large and not too detailed:</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-rotate-large.gif" alt="dfp rotate large">
+</div>
+</div>
+<div class="paragraph">
+<p>You don’t have to create every graphic in your game from scratch, placing your pixels one by one—but it’s not a bad idea to do some touch-up for clarity.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_dither_patterns">1.6. Dither patterns</h3>
+<div class="paragraph">
+<p>Black-and-white pixel art often uses dithering to convey shades and textures.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-dither-1.png" alt="dfp dither 1">
+</div>
+</div>
+<div class="paragraph">
+<p>Some graphics apps will convert color art into 1-bit dither patterns for you. While this is a reasonable way to go about making art for Playdate, note that the resulting images may look quite noisy.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-dither-noisy.png" alt="dfp dither noisy">
+</div>
+</div>
+<div class="paragraph">
+<div class="title">A computer-dithered image can end up fuzzy</div>
+<p>As with transformed sprites, it’s best to clean up any such graphics manually.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_dither_flashing">1.7. Dither flashing</h3>
+<div class="paragraph">
+<p>If you use a checkered pattern 2 x 2 pixels in size and scroll it by 1 pixel at a time, all the black and white pixels in this pattern will swap as you scroll. This can cause the display to flash in a distracting or annoying way.</p>
+</div>
+<details>
+<summary class="title">Click here to view an approximation of this effect. Note that this image is by its very nature unpleasant; people with sensitivities to flashing images shouldn&#8217;t view it.</summary>
+<div class="content">
+<div class="imageblock pixelart noselect">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-dither-flashing.gif" alt="dfp dither flashing">
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Here are some strategies you can try to minimize this:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Always scroll by a multiple of 2 pixels, which will result in the black and white pixels staying in the same position on the screen.</p>
+</li>
+<li>
+<p>Apply the pattern after scrolling. You can do this by masking the dithered area and drawing it separately.</p>
+</li>
+<li>
+<p>Consider a different pattern. If your game will scroll horizontally, use a horizontal pipeline pattern, which won’t shift any pixels when moved.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This flashing artifact may be noticeable with other dithers as well, and you can use these same approaches to fixing it.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_refresh_rate">1.8. Refresh rate</h3>
+<div class="paragraph">
+<p>By default, Playdate games run at 30 frames per second (fps). This will look smooth and perform well in most cases. Sequences with lots of movement should ideally run at 30 fps. If your game drops down to 20 fps, it will still be acceptable, especially if your animation style is chunky and you’re not scrolling the entire screen frequently. In games with little movement and big, instant jumps in position (a board game or card game, for example) the frame rate doesn’t matter as much, and you can even request a lower refresh rate from the system to conserve battery life.</p>
+</div>
+<div class="paragraph">
+<p>The maximum refresh rate you can set is 50 fps. This will look even smoother, and it’ll be particularly noticeable when moving graphics along curved paths. Note that at 50 fps, all other things being equal, your game has 40% less time to execute its code on each frame. You’ll have to optimize the code to hit that high fps. It may be necessary to write high-frame-rate code in C, rather than Lua. There may also be a negative impact to battery life.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_screen_accessibility">1.9. Screen accessibility</h3>
+<div class="paragraph">
+<p>The player can set certain accessibility preferences in Settings. See the <a href="./Inside%20Playdate.html#_accessibility">Accessibility</a> section of <em>Inside Playdate</em> for information on how to read these, and how to adjust your game to suit them.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sound">2. Sound</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Playdate’s 1-bit screen might suggest the audio of an older console, limited to beeps and boops, but it actually has very modern sound capabilities. You can play compressed or uncompressed audio at 44,100 Hz.</p>
+</div>
+<div class="paragraph">
+<p>Playdate has a powerful little speaker built in. Given the small size of the device, this speaker may have a different audio profile from your computer’s speakers, or the headphones you wear when you test your game. If possible, test your audio on the Playdate itself to make sure everything sounds the way you’d like. Listen for bass notes too low to be audible, or peaks that appear noisy through the speaker. Also try your game on device with headphones plugged in.</p>
+</div>
+<div class="paragraph">
+<p>Audio samples gathered from different sources will differ in their output level; some will be louder than others. It’s a good idea to check the levels of your samples and normalize them to the same range of loudness. You can establish this target level by comparing your audio to other Playdate games and system sounds when set to the same system volume. Players will appreciate it if a game isn’t substantially quieter or louder than others if the system volume has not been changed.</p>
+</div>
+<div class="sect2">
+<h3 id="_sound_accessibility">2.1. Sound accessibility</h3>
+<div class="paragraph">
+<p>Playdate is a handheld console, and players might take it to environments where they can’t hear it well or play it loudly—in a busy park, on the bus, in a quiet room. Keep in mind deaf or hard-of-hearing players as well. Consider these options:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Provide subtitles for dialogue.</p>
+</li>
+<li>
+<p>Indicate sound effects with onscreen blips and other visual feedback.</p>
+</li>
+<li>
+<p>If audio is crucial to your game, let the player know. Advise them to un-silence their device or use headphones—perhaps on your game’s start screen.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_crank">3. Crank</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The crank is a unique and versatile input method. It can be used for fast, athletic controls in a sporty game, or it can be delicate and precise in a balancing game. Deciding how to map the player’s crank movement to changes in the game will make a game feel more muscle-heavy or more precise. As with other inputs and outputs, playing on the actual hardware will be the most instructive way to test and tune.</p>
+</div>
+<div class="sect2">
+<h3 id="_using_buttons_and_the_crank_together">3.1. Using buttons and the crank together</h3>
+<div class="paragraph">
+<p>If your game needs one primary button in addition to the crank, it might be best to use the B button instead of the A button (even though we typically recommend the A button for the primary action). For a right-handed player, using the crank with the right hand, while using the left thumb to press the B button is a fairly natural and comfortable way to hold the device.  Using the crank with the A button simultaneously might require too much reach or become uncomfortable over an extended period of time.</p>
+</div>
+<div class="paragraph">
+<p>Alternatively, you can use the d-pad as up to 4 action buttons if you’re not using it for movement. For instance, if your game needs the crank, an “action” button (A) and a “pick up” button, the d-pad’s right button could be used for “pick up.” While that’s not an action that naturally maps to the rightward direction, the overall experience of pressing this button may be more comfortable in the long run. This may also be more comfortable for a left-handed player using the device with the Upside Down system setting.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_crank_accessibility">3.2. Crank accessibility</h3>
+<div class="paragraph">
+<p>Some players have difficulty using the crank. When possible, provide d-pad alternatives to crank controls. For example, if the d-pad’s left and right (or up and down) buttons aren’t otherwise used in your game, they could be mapped to forward and backward cranking.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_buttons">4. Buttons</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The A button has the natural connotation of “confirm,” “go,” or “primary action.” The B button tends to mean “cancel,” “go back,” or “secondary action.” During gameplay, you can use them however you think makes the most sense. In menus and other housekeeping views, we recommend you stick to the expected behavior. Players will expect the A button to activate elements, and the B button to close modal views and step back in nested menus.</p>
+</div>
+<div class="paragraph">
+<p>When instructing the player about your game’s UI, it’s helpful to enclose the A and B in circles, as they are on the device itself:</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-ab-game.png" alt="dfp ab game">
+</div>
+</div>
+<div class="paragraph">
+<p>We provide glyphs for this in many of our fonts, mapped to the following characters:</p>
+</div>
+<div class="paragraph">
+<p>Ⓐ Ⓑ</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-ab.png" alt="dfp ab">
+</div>
+</div>
+<div class="paragraph">
+<p>By the way, we have also font characters for other Playdate buttons:</p>
+</div>
+<div class="paragraph">
+<p>🟨 ⊙ 🔒 🎣 ✛ ⬆️ ➡️ ⬇️ ⬅️</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-chars.png" alt="dfp chars">
+</div>
+</div>
+<div class="sect2">
+<h3 id="_button_accessibility">4.1. Button accessibility</h3>
+<div class="paragraph">
+<p>If your game needs only one or two buttons, consider allowing these actions to be performed with more than one button, as well as the crank. For instance, if your game has just one “jump” action, you could map this to the A button, the B button, the up button on the d-pad, and a turn of the crank. That way, the player can choose whatever input is most comfortable for them.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_accelerometer">5. Accelerometer</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Playdate has a 3-axis accelerometer. This can tell you how the device is tilted on x, y, and z axes. Note that unlike a gyroscope, an accelerometer can’t report non-gravitational acceleration. This means if you place your Playdate on a flat surface, then twist it while keeping it flat, the accelerometer won’t see any change in gravitational forces. In most cases, the accelerometer will be sufficient to tell you whether the device is leaning one way or another, if it’s being shaken, or if some other motion-based gesture is happening.</p>
+</div>
+<div class="paragraph">
+<p>It may be a good idea to include accelerometer calibration in your game, to let the player reset the "zero" position. For instance, if they&#8217;re playing while lying down, they will expect the "zero" position to be different from a Playdate lying down on a flat surface.</p>
+</div>
+<div class="paragraph">
+<p>To see the accelerometer in action, launch the Input Test tool inside the Settings app, in the System section. Its readout should make clear what motions are reported and how. This tool is handy for inspecting the various hardware inputs of your Playdate.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_user_interface">6. User Interface</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Playdate doesn’t have a lot of system UI. There’s the Setup process, the Home screen, the Menu, and Settings. These are designed to be clear, readable, quick to use, and playful where appropriate. Beyond that, we’d like your games to be the star of the show.</p>
+</div>
+<div class="paragraph">
+<p>We don’t provide many UI widgets for games to call through our APIs. Most developers like constructing their own buttons, menus, and sounds, to match their game. Some of the Playdate APIs will help with this, such as <a href="./Inside%20Playdate.html#C-ui.gridview">playdate.ui.gridview</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="_system_font">6.1. System font</h3>
+<div class="paragraph">
+<p>Most of Playdate’s system UI is set in the font Roobert 20 Medium, available as part of the SDK Resources. For larger headings, we use Roobert 24 Medium. This is a legible font set at generous sizes—when possible, aim for this level of text clarity.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-roobert-20.png" alt="dfp roobert 20">
+</div>
+</div>
+<div class="paragraph">
+<p>If our text-drawing APIs aren’t given a font to use, or when they fail to load a font or a character, they will default to the font Asheville 14. This font is specifically meant to communicate to you that something has gone wrong with your text-draw. You should replace Asheville with another font for better legibility.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_onscreen_keyboard">6.2. Onscreen keyboard</h3>
+<div class="paragraph">
+<p>You can call <a href="./Inside%20Playdate.html#M-keyboard">playdate.keyboard.show</a> to show a keyboard for text entry. This could be useful for entering the player’s in-game name, or for other short text input. The keyboard is meant to make text input fast and sensible. That said, we can only make it so effective on a handheld console; if your game expects a lot of text input, it’s worth pondering if that will be fun. Perhaps a custom keyboard designed specifically for your use would be nicer.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_crank_indicator">6.3. Crank indicator</h3>
+<div class="paragraph">
+<p><em>Inside Playdate</em> covers the use of the <a href="./Inside%20Playdate.html#C-ui.crankIndicator">playdate.ui.crankIndicator</a> API. It may not be obvious at first to a brand new player that your game is crank-operated, since not all games will be. The crank indicator provides a standardized way to nudge players in the right direction.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-crank-indicator.gif" alt="dfp crank indicator">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_qr_codes">6.4. QR codes</h3>
+<div class="paragraph">
+<p>If your game needs to point the user to a short or memorable URL—for example, play.date—showing it is as a text label is fine. Anything that’s generated by the game, long, or too complex to type into a web browser, is best done by displaying a QR code. (See <a href="./Inside%20Playdate.html#_qrcode">playdate.graphics.generateQRCode</a>).</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-qr.png" alt="dfp qr">
+</div>
+</div>
+<div class="paragraph">
+<p>However, it&#8217;s possible the user might not have a way to scan a QR code, so displaying the URL in addition to the QR code may be appropriate.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_launcher">7. Launcher</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Your game’s metadata typically won’t be seen by the player in the launcher. However, they will be able to see it in the Games section of Settings. They may explore this on their own, or use it for support purposes. This means it’s still important to provide accurate and helpful information here: your game’s name as you want it to be used by your players, and its current version number.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://sdk.play.date/inside-playdate/#pdxinfo" class="bare">https://sdk.play.date/inside-playdate/#pdxinfo</a></p>
+</div>
+<div class="paragraph">
+<p>See <a href="./Inside%20Playdate.html#pdxinfo">System and Game Metadata</a> for details on how to configure your game’s metadata.</p>
+</div>
+<div class="sect2">
+<h3 id="_launcher_card">7.1. Launcher card</h3>
+<div class="paragraph">
+<p>The launcher card is the player’s first impression of your game, and it’s the game’s representative artwork on Playdate. They should be able to recognize the game from it, and it should perhaps make them feel however you’d like them to feel about your game: curious? excited? challenged?</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-launcher-card.png" alt="dfp launcher card">
+</div>
+</div>
+<div class="paragraph">
+<p>Note that Playdate doesn’t display a label with your game’s name. You should include the name in the card image itself.</p>
+</div>
+<div class="paragraph">
+<p>Launcher cards can be changed and animated at several points: when selected, when the player presses A to launch them, and as your game is loading. Chaining these animations can provide a smooth transition from the launcher to the first screen of your game.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-launcher-transition.gif" alt="dfp launcher transition">
+</div>
+</div>
+<div class="paragraph">
+<p>Of course, you don’t have to make it a smooth transition if you have another sort of cut between the launcher and game in mind.</p>
+</div>
+<div class="paragraph">
+<p>See <a href="./Inside%20Playdate.html#_system_and_game_metadata">System and Game Metadata</a> for details on how to configure your game’s launcher card.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_menu">7.2. Menu</h3>
+<div class="paragraph">
+<p>If your game has options and features you don’t wish to include in the game’s UI, you can add them to the System Menu.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-menu-options.png" alt="dfp menu options">
+</div>
+</div>
+<div class="paragraph">
+<p>It’s up to you which features you put in the menu. Here are some examples:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Options like turning music on and off, or changing the font size.</p>
+</li>
+<li>
+<p>A link to your game’s own options screen, if you need the whole screen for this UI.</p>
+</li>
+<li>
+<p>An in-game feature like the inventory, map, or character customization.</p>
+</li>
+<li>
+<p>Game-flow features like restarting the level, or starting a new game.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Since there’s limited space in the System Menu, you may wish to collapse several rows into one row with multiple options.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-menu-options.gif" alt="dfp menu options">
+</div>
+</div>
+<div class="paragraph">
+<p>Note that players might need to be told to look for this option in the Menu; if your game teaches the players about its controls, it might be a good idea to call out your custom menu options.</p>
+</div>
+<div class="paragraph">
+<p>See <a href="./Inside%20Playdate.html#_interacting_with_the_system_menu">Interacting with the System Menu</a> for information on how to set up your custom menu items.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_menu_image">7.3. Menu Image</h3>
+<div class="paragraph">
+<p>While your game is paused, it can show a custom image the left of the System Menu. (See <a href="./Inside%20Playdate.html#c-setMenuImage">playdate.setMenuImage</a>.) Since you can create this image in code, it can include game-data, thus becoming another view in your game.</p>
+</div>
+<div class="imageblock pixelart">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-menuimage.png" alt="dfp menuimage">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_performance">8. Performance</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A well-optimized game will run smoothly, without stuttering, dropping frames, or freezing. It will also use less battery power—a concern that may be important when players aren’t near a power source. As much as possible, try to spare the Playdate battery; it’s a win-win.</p>
+</div>
+<div class="paragraph">
+<p>A major way to achieve this is to not redraw the screen more than is needed. You can check how much of the screen is being redrawn in your game if you enable the "Highlight Screen Updates" option in the Playdate Simulator:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Designing%20for%20Playdate/dfp-screen-updates.png" alt="dfp screen updates">
+</div>
+</div>
+<div class="paragraph">
+<p>If large portions of your screen are constantly painted orange, it likely means you could make improvements to how the graphics are drawn.</p>
+</div>
+<div class="paragraph">
+<p>If you use our sprite system, it will handle a lot of this work for you. Sprites are redrawn only when the data and the bitmaps backing them are actually changed; a still sprite will be drawn only once, and it won’t be repainted until something about it changes. This, again, is good for performance, and also for the batteries of your players’ devices.</p>
+</div>
+<div class="paragraph">
+<p>Even if you&#8217;re not using our sprite system, you don&#8217;t need to redraw the entire content of the screen on each update, just the areas which have changed. This can be a significant performance and battery life gain for non-action games where display elements move less frequently.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_playdate_simulator_vs_playdate_hardware">9. Playdate Simulator vs. Playdate hardware</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_simulator_performance">9.1. Simulator performance</h3>
+<div class="paragraph">
+<p>The Playdate Simulator is a desktop app that can preview your game before transferring it to a Playdate. It’s a fast and convenient way to check your code quickly. Please remember, however, that the Simulator doesn’t faithfully emulate the performance of the Playdate console hardware. Your code may run significantly faster in the Simulator, or it may have different performance patterns. Optimize for the hardware, not the Simulator.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_simulator_appearance">9.2. Simulator appearance</h3>
+<div class="paragraph">
+<p>Due to differences in resolution, on most computer displays Playdate Simulator will appear larger than an actual Playdate held next to it. Don’t rely on the size of your text and sprites in the Simulator to decide whether your graphics will read comfortably.</p>
+</div>
+<div class="paragraph">
+<p>The Simulator can attempt to mimic the appearance of the Playdate by turning its pure black and pure white into grays that roughly match a well-lit Playdate screen. This is just an approximation; Playdate isn’t backlit and won’t have the same black-to-white contrast in all environments.</p>
+</div>
+<div class="paragraph">
+<p>Whenever possible, check the performance and appearance of your game on an actual Playdate—it’s how your players will play it.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2022-07-12 05:03:16 UTC
+</div>
+</div>
+</body>
+</html>
